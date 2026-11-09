@@ -3,7 +3,7 @@
 > 一个政企客户经理一个人管一支队伍用的作战台：**派单 → 状态流转 → 一线反馈 → 数据卡在哪个部门 → 日报简报**。
 > 单文件 HTML，零依赖、零构建、离线可用，数据存浏览器 `localStorage`。也可部署成线上版：**一个链接两种身份**（未登录只读 / 登录后可编辑，数据存云端）。
 
-这个仓库开放给其他 AI 和工程师一起改。**它不是常规工程**——一个 HTML 文件 + 28 层尾部补丁，改错位置的概率很高，所以请先读完 [《接手须知》](docs/HANDOFF.md) 再动手。
+这个仓库开放给其他 AI 和工程师一起改。**它不是常规工程**——一个 HTML 文件 + 30 层尾部补丁，改错位置的概率很高，所以请先读完 [《接手须知》](docs/HANDOFF.md) 再动手。
 
 ---
 
@@ -17,14 +17,14 @@ node _cloud/r10_run.js
 ```
 
 - 回归靠 **Chrome headless `--dump-dom`** 跑，不装任何依赖；本机需有 Chrome（脚本里 `CHROME` 常量写的是 Windows 路径，换机器要改）。
-- `r10_run.js` 目前跑 **24 组断言 + 4 组打印实测 = 28 项**。
+- `r10_run.js` 目前跑 **26 组断言 + 4 组打印实测 = 30 项**。
 - 首次打开是空的，点引导卡里的「装入演示数据」可一键灌入 8 家客户 / 12 个业务的样例。
 
 ## 仓库结构
 
 | 路径 | 说明 |
 | --- | --- |
-| `政企作战台.html` | **主文件**，UI + 逻辑 + 样式全在里面（约 336 KB，唯一产物） |
+| `政企作战台.html` | **主文件**，UI + 逻辑 + 样式全在里面（约 340 KB，唯一产物） |
 | `docs/HANDOFF.md` | **《接手须知》**：补丁行号地图、数据结构、设计红线、已知坑表 —— **先读这个** |
 | `_cloud/check.js` | 抽内联脚本做语法检查 |
 | `_cloud/r10_run.js` | 一键跑全部回归 |
@@ -33,6 +33,9 @@ node _cloud/r10_run.js
 | `_cloud/one.js` | 单页跑一次并打印 TESTOUT + 红灯清单 |
 | `_cloud/smoke_share.js` | **产物级**冒烟：跑构建产物 `share/index.html` 而非源文件 |
 | `_cloud/smoke_share_mob.js` | 产物级移动端冒烟（375 / 320 真视口） |
+| `_cloud/shot_views.js` | 逐视图截图（13 个视图 × 浅色/深色/窄屏），用来肉眼查 UI |
+| `_cloud/overflow_probe.js` | 375 真视口下逐个元素定位横向溢出 |
+| `_cloud/probe_dark.js` | 对构建产物读深色模式下的计算样式，查配色是否真的生效 |
 | `cloud_build.js` / `cloud_glue.js` | 构建脚本：源文件 + 云 SDK + 登录层 → `share/index.html` |
 | `cloud_config.example.json` | 云配置示例（复制成 `cloud_config.json` 再填自己的值） |
 | `政企作战台_数据.example.json` | 演示数据种子示例（复制成 `政企作战台_数据.json` 再用） |
@@ -55,7 +58,7 @@ node _cloud/r10_run.js
 })();
 ```
 
-所以**同一件事可能分散在好几层**，读代码要按 [《接手须知》第 4 节](docs/HANDOFF.md#4-代码结构一份文件--28-层补丁) 的行号地图走，不要从头顺读。
+所以**同一件事可能分散在好几层**，读代码要按 [《接手须知》第 4 节](docs/HANDOFF.md#4-代码结构一份文件--30-层补丁) 的行号地图走，不要从头顺读。
 
 ### 三条铁律（违反就出玄学 bug）
 
@@ -88,7 +91,7 @@ new MutationObserver(() => { try{ patchDrawer(); }catch(e){} }).observe(drawerRo
 
 ```bash
 node _cloud/check.js                  # 语法
-node _cloud/r10_run.js                # 24 组断言 + 4 组打印实测
+node _cloud/r10_run.js                # 26 组断言 + 4 组打印实测
 node _cloud/smoke_share.js            # 产物级冒烟（含作战室几何）
 node _cloud/smoke_share_mob.js 375    # 移动端真视口
 ```
@@ -98,7 +101,7 @@ node _cloud/smoke_share_mob.js 375    # 移动端真视口
 ### 改代码时的红线
 
 - **零依赖**：不许引 CDN、不许装图表库。「离线、单文件、可打印」这三条不能被破坏。
-- **不许重构补丁结构**：28 层叠层是这个项目能持续迭代的前提，只许往上加。
+- **不许重构补丁结构**：30 层叠层是这个项目能持续迭代的前提，只许往上加。
 - **不许改存储键**：`localStorage['zq_workbench_v2']`、快照键 `zq_wb_snap_v3` 改了就丢用户数据。
 - **设计红线见 [《接手须知》第 6 节](docs/HANDOFF.md#6-设计红线改之前必须遵守)**：五段闭环、门禁只拦推进不拦保存、白板联动单向只读、一次性项目与常设运维分型。
 - **不确定先问，别猜**。
@@ -130,6 +133,8 @@ node _cloud/smoke_share_mob.js 375    # 移动端真视口
 | 真 375px 视口 | `--window-size=375` 实际给 526px | 外层套 `width:375px` 的 iframe |
 | 抽屉不走 `render()` | 钩 render 的补丁永不执行 | 挂 `MutationObserver` 盯 `#drawerRoot` |
 | 补丁层叠加 | 后一层换模板吃掉前一层可见结果 | 每轮回头核对上一层的东西还在不在 |
+| SVG 里写死的浅色 | 作战室整块是 SVG，深色主题下变成一整块白板 | 用 CSS 覆盖 SVG 表现属性（`rect[fill="#fff"][opacity=".55"]`），**按元素类型限定**，别全局替换 `#fff` |
+| 种子文件忘了脱敏 | 源文件脱敏了，种子 JSON 里的真名照样打进产物 | 脱敏连种子一起做；`smoke_share.js` 会拿本地敏感词清单扫产物 |
 
 完整版见 [《接手须知》第 8 节](docs/HANDOFF.md#8-已知的坑照抄别再踩一遍)。
 

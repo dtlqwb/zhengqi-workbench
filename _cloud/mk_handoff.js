@@ -41,7 +41,9 @@ const MARKS = [
   ['R17', 'R17（2026-11-08）：数据体检', '15 类脏数据扫描（负责人丢失、金额为负、段位非法、S5 无复盘…），条目可点击直达'],
   ['R18', 'R18（2026-11-08）：一页纸汇报', 'buildReport 生成 A4 一页纸（条目多了自动 dense 压缩）+ buildText 纯文本发微信'],
   ['R19', 'R19（2026-11-08）：键盘能走完', '焦点环、跳转链接、[data-act] 补 tabindex/role/aria-label、弹层焦点锁定与归还'],
-  ['R20', 'R20（2026-11-08）：第一次打开', '空数据三步引导卡 + loadDemo（带 8 家客户并把项目绑上客户）']
+  ['R20', 'R20（2026-11-08）：第一次打开', '空数据三步引导卡 + loadDemo（带 8 家客户并把项目绑上客户）'],
+  ['R21', 'R21（2026-11-09）：UI 体检修复', '版本标签统一 / R13 清单只进客户视图 / 清单横排 / 空金额条不留空进度 / 线上首屏载入遮罩'],
+  ['R22', 'R22（2026-11-09）：深色模式适配', '深色主题下作战室 SVG 与协调流程图仍是一整块白板 —— 用 CSS 覆盖 SVG 表现属性修好']
 ];
 const marks = MARKS.map(([tag, needle, desc]) => ({ tag, desc, line: lineOf(needle) }))
   .filter(m => m.line)
@@ -79,7 +81,9 @@ const TESTS = ['check.js', 'r10_run.js', 'tseed.js', 'one.js', 'print_check.js',
   'mktest_r5.js', 'mktest_r6.js', 'mktest_r7.js', 'mktest_r8a.js', 'mktest_r9.js', 'mktest_r9b.js',
   'mktest_r9c.js', 'mktest_r9d.js', 'mktest_room.js',
   'mktest_r12.js', 'mktest_r13.js', 'mktest_r14.js', 'mktest_r15.js', 'mktest_r16.js',
-  'mktest_r17.js', 'mktest_r18.js', 'mktest_r19.js', 'mktest_r20.js', 'mktest_mob.js'];
+  'mktest_r17.js', 'mktest_r18.js', 'mktest_r19.js', 'mktest_r20.js', 'mktest_r21.js', 'mktest_r22.js',
+  'mktest_mob.js',
+  'shot_views.js', 'overflow_probe.js', 'probe_dark.js'];
 let copied = 0;
 TESTS.forEach(f => {
   const p = path.join(__dirname, f);
@@ -105,13 +109,13 @@ const HANDOFF = `# 交接说明 · 政企团队可视化工作台
 # 1) 双击 政企作战台.html 就能用（Chrome / Edge，无需服务器、无需 npm install）
 # 2) 语法检查（改完必跑）
 node _cloud/check.js
-# 3) 13 组回归（改完必跑，全绿才算改对）
+# 3) 30 项回归（改完必跑，全绿才算改对）：26 组断言 + 4 组打印实测
 node _cloud/r10_run.js
 \`\`\`
 
 - 回归脚本靠 **Chrome headless \`--dump-dom\`** 跑，不装任何依赖；需要本机有 Chrome。
   脚本里 \`CHROME\` 常量写的是 Windows 路径，换机器要改。
-- \`_cloud/r10_run.js\` 会依次跑 R1～R11 共 13 组断言，输出 \`PASS/FAIL\`。
+- \`_cloud/r10_run.js\` 会依次跑 R1～R22 共 26 组断言（另含 4 组打印实测，合计 30 项），输出 \`PASS/FAIL\`。
 
 ## 3. 文件地图
 
@@ -119,9 +123,9 @@ node _cloud/r10_run.js
 | --- | --- | --- |
 | \`政企作战台.html\` | **主要读这个** | 唯一产物，UI + 逻辑 + 样式全在里面 |
 | \`_cloud/check.js\` | 用 | 抽内联脚本做语法检查 |
-| \`_cloud/r10_run.js\` | 用 | 一键跑 13 组回归 |
+| \`_cloud/r10_run.js\` | 用 | 一键跑 30 项回归（26 组断言 + 4 组打印） |
 | \`_cloud/mktest_*.js\` | 看 | 各组断言的测试页生成器（造假数据 → 注入 → 无头断言） |
-| \`_cloud/real_payload.json\` | 看 | 真实数据结构样本（手机号已打码） |
+| \`_cloud/real_payload.json\` | 看 | 脱敏后的数据结构样本（手机号已打码） |
 | \`HANDOFF.md\` | 就是本文件 | — |
 
 **包里没有的东西**（也不需要）：云端配置、构建脚本、线上产物、真实数据备份。本项目可以完全离线开发。
@@ -190,12 +194,14 @@ S = {
 
 \`\`\`bash
 node _cloud/check.js      # 语法
-node _cloud/r10_run.js    # 24 组断言 + 4 组打印实测（见下）
+node _cloud/r10_run.js    # 26 组断言 + 4 组打印实测（见下）
 \`\`\`
 
 覆盖范围：R1~R5 五段闭环 / R6+R12 移动端 / R7 搜索 / R8 视觉 / R9 大数据与配额 /
 R11 作战室几何 / R12 金额 / R13 客户跟进 / R14 逾期处置 / R15 批量与撤销 /
 R16 对手打法 / R17 数据体检 / R18 一页纸 / R19 键盘无障碍 / R20 引导与演示数据 /
+R21 UI 体检（版本标签 / 清单归属 / 横排 / 空进度条 / 首屏遮罩）/
+R22 深色模式（作战室 SVG / 协调流程图 配色重做）/
 M1-M2 真 375·320 视口无横向溢出 / P1-P4 打印永远 1 页。
 
 写新断言时的入口：
@@ -222,6 +228,9 @@ M1-M2 真 375·320 视口无横向溢出 / P1-P4 打印永远 1 页。
 | headless 里的 \`confirm()\` | 不返回、页面直接挂死，dump-dom 永远等不到 | 测试页开头把 \`confirm/alert/prompt/print\` 全部打桩 |
 | 抽屉不走 \`render()\` | 业务档案/客户抽屉是直接改 \`innerHTML\`，钩在 render 上的补丁永远不执行 | 加 \`MutationObserver\` 盯 \`#drawerRoot\`，渲染后原地补 DOM |
 | 补丁层叠加渲染 | 后一层换掉模板，前一层的可见结果静默失效（R2 换卡后 R1 的整行消失） | 每次加层都回头确认上一层的可见结果还在 |
+| 通用类名撞车 | 全局 \`.list\` 是竖排，R13 的客户清单也用 \`.list\` → 每家客户占一整行 | 自己的规则里显式写 \`flex-direction:row\`，别指望继承 |
+| 同一容器名跨视图复用 | 客户卡与市公司部门卡都是 \`.org-grid\`，R13 没分辨就把客户跟进清单插进了协调流程 | 补丁要先确认「这张卡是不是我要的那种卡」，再决定插不插 |
+| 版本号停在旧层 | 角落版本标签由 V7 层设定，后面 13 层都没再更新，一直显示 V7 | 每次大改后核对角标；标签要在渲染后统一改 DOM（\`setVer\` 在闭包里，外部改不到） |
 
 ## 9. 待办（按优先级，都还没做）
 
@@ -242,7 +251,7 @@ M1-M2 真 375·320 视口无横向溢出 / P1-P4 打印永远 1 页。
 
 要求：
 1. 只改 政企作战台.html，不要引入任何外部依赖（CDN / npm 包都不行）。
-2. 每次改完必须跑 node _cloud/check.js 和 node _cloud/r10_run.js，13 组必须全绿。
+2. 每次改完必须跑 node _cloud/check.js 和 node _cloud/r10_run.js，30 项必须全绿。（在完整仓库里若改到构建产物，再跑 node _cloud/smoke_share.js 和 node _cloud/smoke_share_mob.js；本交接包不含构建链，跑不了这两项。）
 3. 改动前先告诉我你打算动哪一层、为什么，等我确认后再改。
 4. 不要重构现有 ${NLAYER} 层补丁结构——它是这个项目能持续迭代的前提。
 5. 不确定的地方先问，不要猜。
@@ -252,10 +261,10 @@ M1-M2 真 375·320 视口无横向溢出 / P1-P4 打印永远 1 页。
 
 ## 附：这个包里有什么 / 没有什么
 
-**有**：完整可运行的 \`政企作战台.html\`（手机号已打码）、13 组回归脚本、脱敏后的数据样本、本说明。
+**有**：完整可运行的 \`政企作战台.html\`（手机号已打码）、30 项回归脚本、脱敏后的数据样本、本说明。
 
 **没有**：云端配置与密钥、线上发布产物、真实数据备份、构建脚本、历史版本快照。
-另外，文件里仍保留**同事姓名**与**客户单位名称**（跑测试要用到），如不希望外传请先告诉我，我出全代号版。
+**仓库里的姓名与单位全部是虚构的**（真实数据、真实姓名、真实客户、云端凭证一律不入库）。
 `;
 
 fs.writeFileSync(path.join(OUT, 'HANDOFF.md'), HANDOFF, 'utf8');

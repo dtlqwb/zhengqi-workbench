@@ -9,6 +9,26 @@ const tmp = path.join(dir, tmpName);
 
 let h = fs.readFileSync(path.join(dir, 'share', 'index.html'), 'utf8');
 
+/* ===== 发布必查第 4 项：产物里不能出现真名 / 真单位 / 本机绝对路径 =====
+   敏感词清单放在 _cloud/real_names.local.txt（本地文件，不入公开仓库）。
+   公开仓库的克隆者没有这个文件 → 自动跳过这一步，不影响别人跑冒烟。 */
+const localList = path.join(__dirname, 'real_names.local.txt');
+const leaks = [];
+if (fs.existsSync(localList)) {
+  const words = fs.readFileSync(localList, 'utf8').split(/\r?\n/)
+    .map(s => s.trim()).filter(s => s && !s.startsWith('#'));
+  words.forEach(w => {
+    const n = (h.split(w).length - 1);
+    if (n) leaks.push(w + '×' + n);
+  });
+  /* 本机绝对路径一律不能进产物 */
+  ['C:\\Users\\', 'C:/Users/', 'E:\\学习', 'E:/学习', 'D:\\360MoveData', 'D:/360MoveData']
+    .forEach(p => { const n = h.split(p).length - 1; if (n) leaks.push(p + '×' + n); });
+  console.log('敏感词清单 ' + words.length + ' 条，命中：' + (leaks.length ? leaks.join(' | ') : '无'));
+} else {
+  console.log('⚠ 未找到 _cloud/real_names.local.txt，已跳过真名/路径检查（本地发布请补上该文件）');
+}
+
 const js = `(function(){
 var out={};window.__ERR=window.__ERR||[];
 window.confirm=function(){return false};window.alert=function(){};window.prompt=function(){return ''};
@@ -151,6 +171,7 @@ if (o.roomLate && o.roomLate.heightEnough === false) bad.push('roomLate 裁人 m
 if (o.hasCloudCfg === false) bad.push('hasCloudCfg=false');
 if (o.hasEmbed === false) bad.push('hasEmbed=false');
 if (o.embedPhoneMasked === false) bad.push('embedPhoneMasked=false（明文手机号）');
+if (leaks.length) bad.push('产物泄露敏感信息：' + leaks.join(' | '));
 ['hasR17', 'hasR18', 'hasR19', 'hasR20'].forEach(k => { if (o[k] === false) bad.push(k + '=false'); });
 if (o.segCols !== undefined && o.segCols !== 5) bad.push('segCols=' + o.segCols + '（应为 5）');
 console.log(bad.length ? '\n红灯：' + bad.join(' | ') : '\n冒烟通过');

@@ -7,6 +7,8 @@ cloud_config.json
 政企作战台_数据.json
 政企作战台_数据_*.json
 !政企作战台_数据.example.json
+# 敏感词清单（本机专属，装着真实姓名与单位，绝不入库）
+_cloud/real_names.local.txt
 
 # ===== 无头测试的临时产物与历史 dump =====
 _cloud/dom*.html
@@ -28,6 +30,7 @@ _s_*.html
 output/
 每日简报/
 .wbapp_*.genie
+_shots/
 
 # ===== 本地工作区记忆与交接包（不入库）=====
 .workbuddy/

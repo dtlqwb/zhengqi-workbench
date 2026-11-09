@@ -1256,7 +1256,7 @@ function initAuto(){
   /* --- 首次引导 --- */
   if(!localStorage.getItem('zq_welcome_v8')&&location.hash!=='#nowelcome'){
     const w=document.createElement('div');w.className='welcome';w.id='welcome';
-    w.innerHTML=`<b>政企作战台 V8 已就绪</b><br>这轮补的是「平时真正用得上的」：项目金额与回款、客户多久没联系、逾期逐条处置（催／改期／关掉）、看板多选批量改、对手与打法、数据体检、一页纸导出。<br>
+    w.innerHTML=`<b>政企作战台 R20 已就绪</b><br>这一版补的是「平时真正用得上的」：项目金额与回款、客户多久没联系、逾期逐条处置（催／改期／关掉）、看板多选批量改、对手与打法、数据体检、一页纸导出、键盘无障碍、首次引导。<br>
       <span style="color:var(--muted)">顶栏：「体检」查脏数据　「导出」打印或复制成文字　Ctrl+K 搜索　? 看快捷键</span>
       <div style="margin-top:9px"><button class="btn sm pri" data-act="closewelcome">知道了</button></div>`;
     document.body.appendChild(w);
@@ -3643,7 +3643,9 @@ function initAuto(){
   .r13sum .it .d{font-size:11px;flex:none}
   .r13sum .it .btn{padding:1px 8px;font-size:11px}
   .r13sum .ok{font-size:12px;color:var(--muted)}
-  body.dark .r13sum .it{background:#1b242b}`;
+  body.dark .r13sum .it{background:#1b242b}
+  /* 全局 .list 是竖排，这里要横排，否则每家客户占一整行 */
+  .r13sum .list{flex-direction:row}`;
   document.head.appendChild(st);
 
   function touchForm(id){
@@ -4710,6 +4712,125 @@ function initAuto(){
   },true);
 
   window.__R20__={isEmpty,loadDemo,card,CLI};
+})();
+
+/* ===== R21（2026-11-09）：UI 体检修复 =====
+   1) 右下角版本标签此前停在「V7」（V7 层设的，后面 13 层都没再更新），统一成 R20
+   2) R13「该联系了」清单只该出现在客户视图 —— 此前协调流程/关系网的「市公司部门」也是 .org-grid，
+      R13 没分辨就插了进去，把「按市公司部门归口的待协调 / 卡点」的标题和内容隔开了
+   3) 金额汇总条在「一个金额都没填」时不再留一条空进度条（看着像坏了）
+   4) 线上版首屏先显示种子数据、再跳成云端数据（2 人 → 15 人）会闪一下，加载入遮罩 */
+(function(){
+  const st=document.createElement('style');
+  st.textContent=`
+  .r21mask{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;
+    align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:13px;color:var(--muted)}
+  .r21mask .sp{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);
+    border-top-color:var(--brand);animation:r21spin .8s linear infinite}
+  @keyframes r21spin{to{transform:rotate(360deg)}}
+  .r21mask b{color:var(--ink);font-size:14px}`;
+  document.head.appendChild(st);
+
+  /* ---- 1) 版本标签 ---- */
+  const VER='政企作战台 R20';
+  function ver(){
+    const v=document.getElementById('verTag');
+    if(v&&v.textContent!==VER)v.textContent=VER;
+  }
+  /* setVer 在闭包里，外部改不到 —— 只能渲染后直接改 DOM（ver() 挂在 observer 与 render 上） */
+
+  /* ---- 2) R13 面板只留在客户视图 / 3) 金额汇总条空态 ---- */
+  function tidy(){
+    const view=document.getElementById('view');if(!view)return;
+    /* R13 插错视图的「该联系了」 */
+    if(S&&S.ui&&S.ui.view!=='client'){
+      view.querySelectorAll('.r13sum').forEach(x=>x.remove());
+    }
+    /* 没填金额时，别留一条空进度条 */
+    view.querySelectorAll('.r12sum').forEach(box=>{
+      const foot=box.querySelector('.foot');
+      if(foot&&/还没有任何业务填了合同额/.test(foot.textContent||'')){
+        const bar=box.querySelector('.bar');
+        if(bar)bar.remove();
+      }
+    });
+    ver();
+  }
+  new MutationObserver(()=>{try{tidy()}catch(e){}}).observe(document.getElementById('view')||document.body,{childList:true,subtree:true});
+  const _r=render;render=function(){_r();try{tidy()}catch(e){}};
+
+  /* ---- 4) 首屏载入遮罩（只在云端版生效，本地版永不出现） ---- */
+  let mask=null,t0=0;
+  function cloudLoading(){
+    const tip=document.getElementById('syncTip');
+    if(!tip)return false;
+    const t=(tip.textContent||'');
+    return t.indexOf('连接云端')>=0;
+  }
+  function maskShow(){
+    if(mask||!window.__CLOUD__)return;
+    mask=document.createElement('div');mask.className='r21mask';
+    mask.innerHTML='<div class="sp"></div><b>正在载入最新数据…</b><span>云端数据到位后会自动切换</span>';
+    document.body.appendChild(mask);
+  }
+  function maskHide(){if(mask){mask.remove();mask=null}}
+  function tick(){
+    if(!window.__CLOUD__){maskHide();return}
+    if(!mask&&cloudLoading())maskShow();
+    if(mask&&(!cloudLoading()||Date.now()-t0>8000))maskHide();
+  }
+  setTimeout(function(){t0=Date.now();maskShow();tick();setInterval(tick,300)},60);
+
+  window.__R21__={ver,tidy};
+})();
+
+/* ===== R22（2026-11-09）：深色模式适配作战室与流程图 =====
+   1) 作战室整块是一个 SVG（#roomSvg），面板底/描边/文字全是写死的浅色 —— 深色主题下变成一整块白板
+   2) 协调流程的两条关系链同理：浅蓝底、浅粉底
+   做法：只用 CSS 覆盖 SVG 的「表现属性」（CSS 规则优先级高于 fill="" 属性），不改主程序一行代码。
+   注意：#fff / #ffffff 在深蓝底的战报卡上表示白字，必须按元素类型限定，不能全局替换。 */
+(function(){
+  const st=document.createElement('style');
+  st.textContent=`
+/* ---- 作战室：地面与底栏 ---- */
+body.dark #roomSvg stop[stop-color="#ffffff"]{stop-color:#3a5273}
+body.dark #roomSvg stop[stop-color="#9fb4d2"]{stop-color:#101a27}
+body.dark #roomSvg rect[fill="#c8d5e8"]{fill:#1d2a3a}
+/* ---- 作战室：三块面板底（按 opacity 区分，别合并）---- */
+body.dark #roomSvg rect[fill="#fff"][opacity=".55"]{fill:#18232f}
+body.dark #roomSvg rect[fill="#fff"][opacity=".42"]{fill:#18232f}
+body.dark #roomSvg rect[fill="#fff"][opacity=".34"]{fill:#141d29}
+/* ---- 作战室：名牌、座位卡、部门卡（无 opacity 的 #fff）---- */
+body.dark #roomSvg rect[fill="#fff"]:not([opacity]){fill:#26364a}
+body.dark #roomSvg [stroke="#dbe3ef"]{stroke:#31465e}
+/* ---- 作战室：文字 ---- */
+body.dark #roomSvg text[fill="#33445c"]{fill:#eaf2fb}
+body.dark #roomSvg text[fill="#42536e"]{fill:#c9d8ec}
+body.dark #roomSvg text[fill="#8a99ae"]{fill:#8fa3bd}
+body.dark #roomSvg text[fill="#6d7f99"]{fill:#93a6c0}
+body.dark #roomSvg text[fill="#7c8a9e"]{fill:#93a6c0}
+body.dark #roomSvg text[fill="#22314a"]{fill:#e8f0fa}
+body.dark #roomSvg text[fill="#48566a"]{fill:#c3d1e2}
+body.dark #roomSvg text[fill="#98a4b5"]{fill:#7f92a9}
+/* ---- 协调流程：两条关系链 ---- */
+body.dark #flowSvg rect[fill="#eaf1ff"]{fill:#16263c}
+body.dark #flowSvg rect[fill="#fdeef5"]{fill:#2c1a24}
+body.dark #flowSvg rect[stroke="#bcd2f7"]{stroke:#2c4763}
+body.dark #flowSvg rect[stroke="#f0c9dc"]{stroke:#5a3145}
+body.dark #flowSvg text[fill="#1b4fa8"]{fill:#9cc4f5}
+body.dark #flowSvg text[fill="#a03c68"]{fill:#f0a8c6}
+body.dark #flowSvg text[fill="#6b4a5c"]{fill:#c9a5b8}
+body.dark #flowSvg text[fill="#42536e"]{fill:#c9d8ec}`;
+  document.head.appendChild(st);
+
+  /* 流程图没有 id，按 viewBox 认出来补一个（幂等） */
+  function tagFlow(){
+    document.querySelectorAll('svg[viewBox="0 0 1180 210"]').forEach(s=>{if(!s.id)s.id='flowSvg';});
+  }
+  tagFlow();
+  new MutationObserver(()=>{try{tagFlow()}catch(e){}}).observe(document.body,{childList:true,subtree:true});
+
+  window.__R22__={tagFlow};
 })();
 load();initAuto();
 </script>

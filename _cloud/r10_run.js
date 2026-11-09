@@ -26,6 +26,8 @@ const TESTS = [
   ['R18 一页纸汇报', 'mktest_r18', '_t_r18.html'],
   ['R19 键盘与无障碍', 'mktest_r19', '_t_r19.html'],
   ['R20 首次引导与演示数据', 'mktest_r20', '_t_r20.html'],
+  ['R21 UI 体检修复', 'mktest_r21', '_t_r21.html'],
+  ['R22 深色模式适配作战室', 'mktest_r22', '_t_r22.html'],
   ['M1 移动端 375 真视口', 'mktest_mob', '_t_mob.html', [375]],
   ['M2 移动端 320 真视口', 'mktest_mob', '_t_mob.html', [320]]
 ];
