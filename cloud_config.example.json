@@ -1,0 +1,20 @@
+{
+  "_说明": "复制成 cloud_config.json 再填自己的值。真实文件不入库（.gitignore 已排除）。",
+  "_字段": {
+    "endpoint": "本应用的云端服务地址，由 WorkBuddy 云服务分配",
+    "oauthRelayBaseUrl": "WorkBuddy OAuth 中继地址",
+    "publishableKey": "前端可公开的 publishable key（页面里本来就会暴露，不是私密凭证）",
+    "resourceId": "云数据库资源 id",
+    "table": "存放作战台数据的表名，默认 workbench",
+    "key": "主数据行的 key，默认 main",
+    "sdkVersion": "云 SDK 版本"
+  },
+  "endpoint": "https://example.app.workbuddy.host",
+  "oauthRelayBaseUrl": "https://www.workbuddy.cn/v2/as/genie-baas/oauth",
+  "publishableKey": "wbpk_REPLACE_ME",
+  "resourceId": "wbcs_REPLACE_ME",
+  "table": "workbench",
+  "key": "main",
+  "sdkVersion": "0.1.4",
+  "_note": "方向约束：作战台只读白板，绝不写白板。白板库的 endpoint 与 publishableKey 不得进页面；白板数据一律经由 wb_mirror 镜像表（服务端定时任务写入）读取。"
+}

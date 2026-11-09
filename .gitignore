@@ -1,0 +1,41 @@
+# ===== 构建产物（由 node cloud_build.js 生成，可随时重建，不入库）=====
+share/
+*.zip
+
+# ===== 真实数据与凭证（绝对不能进公开仓库）=====
+cloud_config.json
+政企作战台_数据.json
+政企作战台_数据_*.json
+!政企作战台_数据.example.json
+
+# ===== 无头测试的临时产物与历史 dump =====
+_cloud/dom*.html
+_cloud/real_dom.html
+_cloud/test_login.html
+_cloud/test_local.html
+_cloud/_t_*.html
+_cloud/*.tgz
+_cloud/wbsdk.json
+_cloud/数据快照_*.json
+_t_*.html
+_s_*.html
+
+# ===== 真实业务数据（白板同步、真实载荷样本）=====
+白板任务_同步.json
+线上政企作战台.url
+
+# ===== 运行时输出 =====
+output/
+每日简报/
+.wbapp_*.genie
+
+# ===== 本地工作区记忆与交接包（不入库）=====
+.workbuddy/
+交接包_给外部AI/
+
+# ===== 编辑器与系统 =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

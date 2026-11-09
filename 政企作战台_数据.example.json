@@ -1,0 +1,104 @@
+{
+  "exportedAt": "2026-11-09 07:55",
+  "dataDate": "2026-11-09",
+  "people": [
+    {
+      "id": "demo_p1",
+      "name": "陆文彦",
+      "role": "客户经理",
+      "rel": "直管",
+      "org": "政企部 · 智慧水务 / 管网漏损",
+      "phone": "134****8566",
+      "note": "对接智慧水务、园区与客户版联系人",
+      "tags": "",
+      "color": "#2f6fb5"
+    },
+    {
+      "id": "demo_p2",
+      "name": "聂婉清",
+      "role": "客户经理",
+      "rel": "直管",
+      "org": "政企部 · KPI 分配 / 考核系统",
+      "phone": "",
+      "note": "KPI 分配、回款台账",
+      "tags": "",
+      "color": "#2f6fb5"
+    }
+  ],
+  "orgs": [
+    {
+      "id": "demo_o1",
+      "name": "示例市公司集客部",
+      "short": "集客部",
+      "color": "#0f6b8a",
+      "duty": "协调集客业务流程"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "demo_t1",
+      "title": "为消防队发送短信给指定目标用户",
+      "due": "2026-11-10",
+      "created": "2026-11-09",
+      "updated": "2026-11-09",
+      "status": "待接收",
+      "prio": "紧急",
+      "flow": "集客部",
+      "flowNote": "",
+      "note": "",
+      "gates": [],
+      "client": "demo_c1",
+      "personId": "demo_p1",
+      "projectId": "",
+      "project": "",
+      "support": [],
+      "receipt": false,
+      "feedback": "",
+      "deliverable": "发送回执报告",
+      "blockedSince": "2026-11-09"
+    }
+  ],
+  "meta": {
+    "demo": true,
+    "theme": "light",
+    "evening": "19:00",
+    "morning": "07:00",
+    "syncPath": "",
+    "autoBrief": true,
+    "briefNote": "",
+    "lastBriefs": []
+  },
+  "ui": {
+    "f": {},
+    "pq": "",
+    "view": "flow"
+  },
+  "ext": [
+    {
+      "id": "demo_c1",
+      "name": "示例县应急管理局",
+      "type": "政府部门",
+      "contact": "周建平",
+      "title": "副主任",
+      "phone": "",
+      "pay": "财政直付",
+      "duty": "消防宣传短信",
+      "color": "#0f6b8a"
+    }
+  ],
+  "projects": [],
+  "roles": [
+    "客户经理",
+    "网格长",
+    "合伙公司负责人",
+    "个体技工",
+    "业务管理"
+  ],
+  "wbInbox": [],
+  "wbSync": {
+    "at": "",
+    "count": 0,
+    "err": "",
+    "source": ""
+  }
+}
